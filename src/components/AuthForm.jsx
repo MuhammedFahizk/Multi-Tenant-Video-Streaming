@@ -7,7 +7,7 @@ const AuthForm = ({ onAuthenticate, isLoading, isAuthenticated }) => {
     accountTypeId: '',
     tenantDomain: 'tenant-domain.in',
     videoId: '1759300483732',
-    pathPrefix: 'hls/1759300486531/hls/'
+    path: 'hls/1759300486531/hls/'
   });
 
   const handleChange = (e) => {
@@ -84,12 +84,12 @@ const AuthForm = ({ onAuthenticate, isLoading, isAuthenticated }) => {
         </div>
 
         <div className="form-group">
-          <label htmlFor="pathPrefix">Path Prefix</label>
+          <label htmlFor="path">Path Prefix</label>
           <input
             type="text"
-            id="pathPrefix"
-            name="pathPrefix"
-            value={formData.pathPrefix}
+            id="path"
+            name="path"
+            value={formData.path}
             onChange={handleChange}
             placeholder="e.g., hls/1759300486531/hls/"
             required

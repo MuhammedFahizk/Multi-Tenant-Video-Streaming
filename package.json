@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "start": "react-scripts start --https --key key.pem --cert cert.pem",
     "lint": "eslint .",
     "preview": "vite preview"
   },
@@ -24,6 +25,7 @@
     "@types/react-dom": "^19.1.9",
     "@vitejs/plugin-react": "^5.0.4",
     "eslint": "^9.36.0",
+    "react-scripts": "^5.0.1",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.22",
     "globals": "^16.4.0",
