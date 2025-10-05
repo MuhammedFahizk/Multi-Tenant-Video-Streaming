@@ -122,7 +122,7 @@ function App() {
 
       <div className="content">
         <VideoPlayer
-          videoUrl={'https://d3e770jczbpwm3.cloudfront.net/hls%2F1759300486531%2Fhls/1758719155895-BigBuckBunny.m3u8'}
+          videoUrl={playlistUrl}
           isAuthenticated={authStatus.isAuthenticated}
           onPlayerReady={() => {
             addToLog('Video player is ready');
