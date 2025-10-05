@@ -85,7 +85,7 @@ export const authService = {
           expiresInSeconds: 3600, // 1 hour
           tenantDomain,
           isFolder: true,
-          playlistFile : "1758719155895-BigBuckBunny.m3u8",
+          playlistFile : "1759300483732-14271205_640_360_60fps.m3u8",
           // ipRange: optional
         },
         {
