@@ -122,7 +122,7 @@ function App() {
 
       <div className="content">
         <VideoPlayer
-          videoUrl={playlistUrl}
+          videoUrl={videoUrl}
           isAuthenticated={authStatus.isAuthenticated}
           onPlayerReady={() => {
             addToLog('Video player is ready');
