@@ -40,3 +40,34 @@
 .read-the-docs {
   color: #888;
 }
+
+
+.video-player-container {
+  margin-bottom: 20px;
+  background: #f5f5f5;
+  padding: 20px;
+  border-radius: 8px;
+}
+
+.video-placeholder {
+  height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #e9ecef;
+  border-radius: 8px;
+  border: 2px dashed #dee2e6;
+}
+
+.video-placeholder p {
+  color: #6c757d;
+  font-size: 16px;
+  margin: 0;
+}
+
+/* Video.js player styling */
+.vjs-big-play-centered .vjs-big-play-button {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}

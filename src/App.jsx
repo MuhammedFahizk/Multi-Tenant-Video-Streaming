@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import AuthForm from './components/AuthForm';
-import VideoPlayer from './components/VideoPlayer';
+import VideoPlayer from './components/VideoPlayer'; // Make sure this import path is correct
 import { authService } from './services/authService';
 import './App.css';
 
@@ -19,99 +19,85 @@ function App() {
     setRequestLog((prev) => [`[${timestamp}] ${message}`, ...prev.slice(0, 10)]);
   };
 
- const handleAuthenticate = async (formData) => {
-  setAuthStatus({
-    isAuthenticated: false,
-    isLoading: true,
-    message: `Starting authentication for tenant: ${formData.tenantDomain}`,
-    error: '',
-  });
-  addToLog(`Starting authentication for tenant: ${formData.tenantDomain}`);
-
-  try {
-    // Step 1: Generate signed URL for folder-level access
-    addToLog(`Calling endpoint to generate signed URL for folder: ${formData.path}`);
-    const authResult = await authService.generateSignedUrl(
-      formData.apiKey,
-      formData.accountTypeId,
-      formData.tenantDomain,
-      formData.path // e.g., "/hls_content/"
-    );
-
-    if (!authResult.success) {
-      throw new Error(authResult.error || 'Failed to generate signed URL');
-    }
-
-    const { authUrl, playlistUrl, expiresAt } = authResult.data;
-    if (!authUrl || !playlistUrl) {
-      throw new Error('Invalid response: missing authUrl or playlistUrl');
-    }
-
-    // Log the URLs for debugging
-    addToLog(`authUrl: ${authUrl}`);
-    addToLog(`playlistUrl: ${playlistUrl}`);
-
-    // Step 2: Call authUrl to set signed cookies
-    addToLog(`Calling authUrl to set signed cookies: ${authUrl}`);
-    const cookieResponse = await fetch(authUrl, {
-      method: 'GET',
-      credentials: 'include', // Ensure cookies are set in the browser
-    });
-
-    // Log the response headers to verify cookies
-    // const cookies = cookieResponse.headers.get('set-cookie');
-    // console.log('Cookie Response:', cookieResponse);
-    // console.log('Set-Cookie Headers:', cookies);
-
-    if (!cookieResponse.ok) {
-      throw new Error(`Failed to set signed cookies: ${cookieResponse.status} ${cookieResponse.statusText}`);
-    }
-
-    // Verify cookies were set
-    const storedCookies = document.cookie;
-    addToLog(`Stored cookies: ${storedCookies}`);
-
-    // Step 3: Set the playlist URL for the video player
-    setVideoUrl(playlistUrl);
-    addToLog(`HLS stream URL set: ${playlistUrl}`);
-
-    // Step 4: Update authentication status
-    setAuthStatus({
-      isAuthenticated: true,
-      isLoading: false,
-      message: `✅ Authenticated successfully! Video should start playing automatically. (Expires at: ${new Date(expiresAt).toLocaleString()})`,
-      error: '',
-    });
-    addToLog('Ready to start HLS streaming with signed URL');
-
-    // Step 5: Test the playlist URL (optional for debugging)
-    // const playlistResponse = await fetch(playlistUrl, {
-    //   method: 'GET',
-    //   credentials: 'include',
-    // });
-    // addToLog(`Playlist fetch status: ${playlistResponse.status}`);
-    // if (!playlistResponse.ok) {
-    //   throw new Error(`Failed to fetch playlist: ${playlistResponse.status} ${playlistResponse.statusText}`);
-    // }
-  } catch (error) {
-    console.error('Authentication error:', error);
-    let errorMessage = 'Authentication failed. Please check credentials and try again.';
-    if (error.message.includes('signed cookies')) {
-      errorMessage = 'Failed to set signed cookies. Please check the auth URL configuration.';
-    } else if (error.message.includes('signed URL')) {
-      errorMessage = 'Failed to generate signed URL. Please verify your credentials.';
-    } else if (error.message.includes('fetch playlist')) {
-      errorMessage = 'Failed to access the HLS playlist. Ensure cookies are sent with the request.';
-    }
+  const handleAuthenticate = async (formData) => {
     setAuthStatus({
       isAuthenticated: false,
-      isLoading: false,
-      message: errorMessage,
-      error: `Error: ${error.message}`,
+      isLoading: true,
+      message: `Starting authentication for tenant: ${formData.tenantDomain}`,
+      error: '',
     });
-    addToLog(`Authentication failed: ${error.message}`);
-  }
-};
+    addToLog(`Starting authentication for tenant: ${formData.tenantDomain}`);
+
+    try {
+      // Step 1: Generate signed URL for folder-level access
+      addToLog(`Calling endpoint to generate signed URL for folder: ${formData.path}`);
+      const authResult = await authService.generateSignedUrl(
+        formData.apiKey,
+        formData.accountTypeId,
+        formData.tenantDomain,
+        formData.path // e.g., "/hls_content/"
+      );
+
+      if (!authResult.success) {
+        throw new Error(authResult.error || 'Failed to generate signed URL');
+      }
+
+      const { authUrl, playlistUrl, expiresAt } = authResult.data;
+      if (!authUrl || !playlistUrl) {
+        throw new Error('Invalid response: missing authUrl or playlistUrl');
+      }
+
+      // Log the URLs for debugging
+      addToLog(`authUrl: ${authUrl}`);
+      addToLog(`playlistUrl: ${playlistUrl}`);
+
+      // Step 2: Call authUrl to set signed cookies
+      addToLog(`Calling authUrl to set signed cookies: ${authUrl}`);
+      const cookieResponse = await fetch(authUrl, {
+        method: 'GET',
+        credentials: 'include', // Ensure cookies are set in the browser
+      });
+
+      if (!cookieResponse.ok) {
+        throw new Error(`Failed to set signed cookies: ${cookieResponse.status} ${cookieResponse.statusText}`);
+      }
+
+      // Verify cookies were set
+      const storedCookies = document.cookie;
+      addToLog(`Stored cookies: ${storedCookies}`);
+
+      // Step 3: Set the playlist URL for the video player
+      setVideoUrl(playlistUrl);
+      addToLog(`HLS stream URL set: ${playlistUrl}`);
+
+      // Step 4: Update authentication status
+      setAuthStatus({
+        isAuthenticated: true,
+        isLoading: false,
+        message: `✅ Authenticated successfully! Video should start playing automatically. (Expires at: ${new Date(expiresAt).toLocaleString()})`,
+        error: '',
+      });
+      addToLog('Ready to start HLS streaming with signed URL');
+
+    } catch (error) {
+      console.error('Authentication error:', error);
+      let errorMessage = 'Authentication failed. Please check credentials and try again.';
+      if (error.message.includes('signed cookies')) {
+        errorMessage = 'Failed to set signed cookies. Please check the auth URL configuration.';
+      } else if (error.message.includes('signed URL')) {
+        errorMessage = 'Failed to generate signed URL. Please verify your credentials.';
+      } else if (error.message.includes('fetch playlist')) {
+        errorMessage = 'Failed to access the HLS playlist. Ensure cookies are sent with the request.';
+      }
+      setAuthStatus({
+        isAuthenticated: false,
+        isLoading: false,
+        message: errorMessage,
+        error: `Error: ${error.message}`,
+      });
+      addToLog(`Authentication failed: ${error.message}`);
+    }
+  };
 
   return (
     <div className="container">

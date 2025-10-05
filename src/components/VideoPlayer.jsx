@@ -1,60 +1,76 @@
-import React, { useEffect, useRef } from 'react';
-import videojs from 'video.js';
-import 'video.js/dist/video-js.css';
+import React from 'react';
+import VideoJS from './VideoJS';
 
-const VideoPlayer = ({ videoUrl, onPlayerReady, onPlayerError }) => {
-  const videoRef = useRef(null);
-  const playerRef = useRef(null);
+const VideoPlayer = ({ videoUrl, isAuthenticated, onPlayerReady, onPlayerError }) => {
+  const playerRef = React.useRef(null);
 
-  useEffect(() => {
-    if (!videoRef.current) return;
+  // Video.js options with HLS support
+  const videoJsOptions = {
+    autoplay: true,
+    controls: true,
+    responsive: true,
+    fluid: true,
+    liveui: true,
+    html5: {
+      vhs: {
+        enableLowInitialPlaylist: true,
+        smoothQualityChange: true,
+        overrideNative: true
+      }
+    },
+    sources: videoUrl ? [{
+      src: videoUrl,
+      type: 'application/x-mpegURL'
+    }] : []
+  };
 
-    // Destroy any existing player instance
-    if (playerRef.current) {
-      playerRef.current.dispose();
-    }
-
-    // Initialize Video.js player
-    const player = videojs(videoRef.current, {
-      controls: true,
-      autoplay: false,
-      preload: 'auto',
-      fluid: true,
-      responsive: true,
-      sources: [
-        {
-          src: decodeURIComponent(videoUrl),
-          type: 'application/x-mpegURL', // HLS stream
-          withCredentials: true, // important for signed cookies
-        },
-      ],
-    });
-
-    player.ready(() => {
-      if (onPlayerReady) onPlayerReady(player);
-    });
-
-    player.on('error', () => {
-      const err = player.error();
-      if (onPlayerError) onPlayerError(err);
-    });
-
+  const handlePlayerReady = (player) => {
     playerRef.current = player;
 
-    return () => {
-      if (playerRef.current) {
-        playerRef.current.dispose();
-      }
-    };
-  }, [videoUrl]);
+    // Handle player events
+    player.on('waiting', () => {
+      console.log('Player is waiting');
+    });
+
+    player.on('loadeddata', () => {
+      console.log('Video data loaded');
+    });
+
+    player.on('error', (e) => {
+      console.error('Player error:', e);
+      const error = player.error();
+      onPlayerError && onPlayerError({
+        message: error ? error.message : 'Unknown video player error',
+        code: error ? error.code : 0
+      });
+    });
+
+    player.on('loadedmetadata', () => {
+      console.log('Video metadata loaded');
+    });
+
+    onPlayerReady && onPlayerReady();
+  };
 
   return (
-    <div data-vjs-player>
-      <video
-        ref={videoRef}
-        className="video-js vjs-default-skin vjs-big-play-centered"
-        playsInline
-      />
+    <div className="video-player-container">
+      <h3>Video Player</h3>
+      {!isAuthenticated ? (
+        <div className="video-placeholder">
+          <p>🔒 Please authenticate to load the video stream</p>
+        </div>
+      ) : !videoUrl ? (
+        <div className="video-placeholder">
+          <p>⏳ Loading video URL...</p>
+        </div>
+      ) : (
+        <>
+          <div className="video-url-info">
+            <small>Stream URL: {videoUrl}</small>
+          </div>
+          <VideoJS options={videoJsOptions} onReady={handlePlayerReady} />
+        </>
+      )}
     </div>
   );
 };
